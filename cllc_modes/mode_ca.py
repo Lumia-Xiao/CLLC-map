@@ -5,7 +5,6 @@ from dataclasses import dataclass
 
 import numpy as np
 from scipy.integrate import quad
-from scipy.optimize import root
 
 from . import config
 from .checks import check_positive_over_interval
@@ -48,7 +47,7 @@ class CASolver(ModeSolverBase):
     mode_name = "CA"
 
     def __init__(self) -> None:
-        self.initial_guess = np.array([0.8, 1.00, 2.51, 0.04, 0.34, -2.37, -0.23, 0.31, -0.01, 0.22, 0.39], dtype=float)
+        self.initial_guess = np.array([1.0, 0.36, 3.12, -0.31, 0.02, -2.13, -0.02, 0.31, -0.01, 0.02, 0.02], dtype=float)
 
     @staticmethod
     def _unpack(x: np.ndarray) -> CAParams:
@@ -121,11 +120,12 @@ class CASolver(ModeSolverBase):
         return waveforms, half_period
 
     def solve(self, op: OperatingPoint) -> SolveResult:
-        sol = root(
-            fun=lambda x: self._equations(x, op),
-            x0=self.initial_guess,
+        sol, residual, max_residual = self._solve_with_restarts(
+            op=op,
+            equations=lambda x: self._equations(x, op),
+            initial_guess=self.initial_guess,
             method=config.ROOT_METHOD,
-            options={"maxfev": config.MAX_FEVAL, "xtol": config.SOLVER_TOL},
+            maxfev=config.MAX_FEVAL,
         )
 
         p = self._unpack(sol.x)
@@ -156,7 +156,7 @@ class CASolver(ModeSolverBase):
         }
 
         all_checks_pass = all(bool(item.get("passed", False)) for item in checks.values())
-        success = bool(sol.success) and (max_residual < config.SOLVER_TOL) and all_checks_pass
+        success = bool(sol.success) and (max_residual < 1e-7) and all_checks_pass
 
         return SolveResult(
             mode=self.mode_name,

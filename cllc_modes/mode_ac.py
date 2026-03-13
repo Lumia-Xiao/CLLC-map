@@ -5,7 +5,6 @@ from dataclasses import dataclass
 
 import numpy as np
 from scipy.integrate import quad
-from scipy.optimize import root
 
 from . import config
 from .checks import check_positive_over_interval
@@ -108,8 +107,13 @@ class ACSolver(ModeSolverBase):
         }, half_period
 
     def solve(self, op: OperatingPoint) -> SolveResult:
-        sol = root(fun=lambda x: self._equations(x, op), x0=self.initial_guess, method=config.ROOT_METHOD,
-                   options={"maxfev": config.MAX_FEVAL, "xtol": config.SOLVER_TOL})
+        sol, residual, max_residual = self._solve_with_restarts(
+            op=op,
+            equations=lambda x: self._equations(x, op),
+            initial_guess=self.initial_guess,
+            method=config.ROOT_METHOD,
+            maxfev=config.MAX_FEVAL,
+        )
         p = self._unpack(sol.x)
         residual = self._equations(sol.x, op)
         max_residual = float(np.max(np.abs(residual)))
@@ -123,5 +127,5 @@ class ACSolver(ModeSolverBase):
             "M_positive": {"passed": p.M > 0.0, "value": p.M},
         }
         all_checks_pass = all(bool(item.get("passed", False)) for item in checks.values())
-        success = bool(sol.success) and (max_residual < config.SOLVER_TOL) and all_checks_pass
+        success = bool(sol.success) and (max_residual < 1e-7) and all_checks_pass
         return SolveResult(mode=self.mode_name, success=success, operating_point=op, params=p.as_dict(), max_residual=max_residual, residual_vector=[float(v) for v in residual.tolist()], checks=checks, message=sol.message, waveforms={"half_period": half_period, "Vin": waveforms["Vin"], "Vo": waveforms["Vo"], "Ir1": waveforms["Ir1"], "Vr1": waveforms["Vr1"], "Ir2": waveforms["Ir2"], "Vr2": waveforms["Vr2"], "Ima": waveforms["Ima"]})
