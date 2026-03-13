@@ -50,7 +50,7 @@ pip install -r requirements.txt
 Single operating point:
 
 ```bash
-python main.py --F 1.0 --k 1.0 --P 0.2 --out waveform.png
+python main.py --f 0.8 --k 4.0 --p 0.2 --out waveform.png
 ```
 
 Sweep a grid and generate `(F, P, M)` distribution:
