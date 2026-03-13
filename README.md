@@ -56,7 +56,7 @@ python main.py --f 0.8 --k 4.0 --p 0.2 --out waveform.png
 Sweep a grid and generate `(F, P, M)` distribution:
 
 ```bash
-python main.py --sweep --k 4.0 --f_min 0.5 --f_max 1.5 --f_num 10 --p_min 0.1 --p_max 0.8 --p_num 10
+python main.py --sweep --k 4.0 --f_min 0.8 --f_max 1.2 --f_num 20 --p_min 0.1 --p_max 0.8 --p_num 20
 ```
 
 This produces:

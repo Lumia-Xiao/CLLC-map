@@ -134,10 +134,11 @@ def plot_fp_m_by_mode(records, title: Optional[str] = None, out_path: Optional[s
     if len(valid) == 0:
         raise ValueError("No valid sweep points to plot.")
 
-    mode_order = ["AC", "BCB", "CBA", "CA"]
+    mode_order = ["AC", "BCB", "CB", "CBA", "CA"]
     markers = {
         "AC": "o",
         "BCB": "^",
+        "CB": "x",
         "CBA": "s",
         "CA": "d",
     }

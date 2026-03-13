@@ -24,3 +24,7 @@ class BCBSolver(_PlaceholderSolver):
 
 class CBASolver(_PlaceholderSolver):
     mode_name = "CBA"
+
+
+class CBSolver(_PlaceholderSolver):
+    mode_name = "CB"

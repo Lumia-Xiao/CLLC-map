@@ -5,6 +5,7 @@ import numpy as np
 from .mode_ac import ACSolver
 from .mode_bcb import BCBSolver
 from .mode_ca import CASolver
+from .mode_cb import CBSolver
 from .mode_cba import CBASolver
 from .types import OperatingPoint, SolveResult
 
@@ -13,7 +14,7 @@ class OperatingPointSolver:
     """Reusable operating-point solver with persistent mode solver instances."""
 
     def __init__(self) -> None:
-        self.candidates = [ACSolver(), BCBSolver(), CBASolver(), CASolver()]
+        self.candidates = [ACSolver(), BCBSolver(), CBSolver(), CBASolver(), CASolver()]
         self._solver_by_mode = {solver.mode_name: solver for solver in self.candidates}
         self._last_success_mode: str | None = None
 
