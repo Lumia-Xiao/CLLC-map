@@ -1,0 +1,8 @@
+from __future__ import annotations
+
+SOLVER_TOL = 1e-10
+CHECK_TOL = 1e-8
+DENSE_CHECK_POINTS = 2000
+PLOT_POINTS = 4000
+ROOT_METHOD = "hybr"
+MAX_FEVAL = 5000
