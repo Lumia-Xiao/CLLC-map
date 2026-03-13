@@ -125,7 +125,7 @@ class CASolver(ModeSolverBase):
             fun=lambda x: self._equations(x, op),
             x0=self.initial_guess,
             method=config.ROOT_METHOD,
-            options={"maxfev": config.MAX_FEVAL},
+            options={"maxfev": config.MAX_FEVAL, "xtol": config.SOLVER_TOL},
         )
 
         p = self._unpack(sol.x)
@@ -156,7 +156,7 @@ class CASolver(ModeSolverBase):
         }
 
         all_checks_pass = all(bool(item.get("passed", False)) for item in checks.values())
-        success = bool(sol.success) and (max_residual < 1e-7) and all_checks_pass
+        success = bool(sol.success) and (max_residual < config.SOLVER_TOL) and all_checks_pass
 
         return SolveResult(
             mode=self.mode_name,

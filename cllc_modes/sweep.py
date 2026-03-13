@@ -171,3 +171,42 @@ def plot_fp_m_by_mode(records, title: Optional[str] = None, out_path: Optional[s
         print(f"Saved figure to: {out_path}")
 
     plt.show()
+
+def plot_fp_m_density(records, title: Optional[str] = None, out_path: Optional[str] = None):
+    """
+    Plot a 2D density-style map on the (F, P) plane with M encoded by color.
+    """
+    valid = [r for r in records if r["success"] and np.isfinite(r["M"])]
+
+    if len(valid) == 0:
+        raise ValueError("No valid sweep points to plot.")
+
+    F = np.array([r["F"] for r in valid], dtype=float)
+    P = np.array([r["P"] for r in valid], dtype=float)
+    M = np.array([r["M"] for r in valid], dtype=float)
+
+    fig, ax = plt.subplots(figsize=(9, 6.5))
+    if len(valid) >= 3:
+        triangulation = ax.tricontourf(F, P, M, levels=24, cmap="viridis")
+        color_source = triangulation
+    else:
+        # Fallback when too few points are available for triangulation.
+        color_source = ax.scatter(F, P, c=M, cmap="viridis", s=30, edgecolors="none", alpha=0.9)
+
+    ax.scatter(F, P, c=M, cmap="viridis", s=12, edgecolors="none", alpha=0.85)
+
+    ax.set_xlabel("F")
+    ax.set_ylabel("P")
+    if title is None:
+        title = "2D density map of M over (F, P)"
+    ax.set_title(title)
+
+    cbar = fig.colorbar(color_source, ax=ax)
+    cbar.set_label("M")
+    plt.tight_layout()
+
+    if out_path:
+        plt.savefig(out_path, dpi=200, bbox_inches="tight")
+        print(f"Saved figure to: {out_path}")
+
+    plt.show()

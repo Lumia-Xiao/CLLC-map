@@ -64,13 +64,31 @@ This produces:
 - `fp_m_distribution.png` (3D `(F, P, M)` distribution)
 - `fp_m_distribution_by_mode.png` (same distribution separated by mode)
 - `fp_m_distribution.csv` (tabular data)
+- `fp_m_distribution_2d_density.png` (2D density map: F-P plane colored by M)
 
 To disable iterative warm-start in sweep mode:
 
 ```bash
-python main.py --sweep --k 1.0 --no_iterative
+python main.py --sweep --k 4.0 --no_iterative
+```
+Speed tuning (recommended for faster per-point calculation):
+
+```bash
+python main.py --sweep --k 4.0 --speed fast
 ```
 
+By default (`--speed config`), values from `cllc_modes/config.py` are used directly.
+
+You can also tune the two core runtime knobs directly:
+
+- `--max_feval` (maps to `config.MAX_FEVAL`): fewer evaluations = faster solve attempts per mode
+- `--check_points` (maps to `config.DENSE_CHECK_POINTS`): fewer legality sample points = faster post-check
+
+Example:
+
+```bash
+python main.py --sweep --k 4.0 --speed fast --max_feval 500 --check_points 100 --density_out fp_m_distribution_2d_density.png
+```
 ## Files
 
 - `cllc_modes/stages.py` Stage equations converted from the original Mathematica derivation.
