@@ -7,7 +7,7 @@ This project is migrated and refactored from the original Mathematica notebook w
 ---
 
 ## Overview
- 
+
 Given an operating point specified by:
 
 - normalized switching frequency `F`
@@ -34,20 +34,8 @@ This provides a unified workflow for **CLLC mode discrimination and waveform vis
 - Stage-wise legality checking over continuous time intervals
 - Waveform stitching for multi-stage operating modes
 - Unified waveform plotting and export
-- Modular code structure for future extension to additional modes
-
----
-
-## Current Implementation
-
-The current solver framework supports:
-
-- automated candidate mode evaluation
-- legality verification for each solved mode
-- automatic mode selection
-- waveform generation and plotting
-
-The codebase is organized so that each operating mode can be implemented as an independent solver module while sharing common stage equations, validation rules, and plotting utilities.
+- Iterative warm-start sweep for robust `(F, P) -> M` distribution generation
+- CSV export of `(F, P, M)` sweep data
 
 ---
 
@@ -57,15 +45,37 @@ The codebase is organized so that each operating mode can be implemented as an i
 pip install -r requirements.txt
 ```
 
+## Usage
+
+Single operating point:
+
+```bash
+python main.py --F 1.0 --k 1.0 --P 0.2 --out waveform.png
+```
+
+Sweep a grid and generate `(F, P, M)` distribution:
+
+```bash
+python main.py --sweep --k 4.0 --f_min 0.5 --f_max 1.5 --f_num 10 --p_min 0.1 --p_max 0.8 --p_num 10
+```
+
+This produces:
+
+- `fp_m_distribution.png` (3D `(F, P, M)` distribution)
+- `fp_m_distribution_by_mode.png` (same distribution separated by mode)
+- `fp_m_distribution.csv` (tabular data)
+
+To disable iterative warm-start in sweep mode:
+
+```bash
+python main.py --sweep --k 1.0 --no_iterative
+```
+
 ## Files
 
-- cllc_modes/stages.py Stage equations converted from the original Mathematica derivation.
-
-- cllc_modes/mode_*.py Individual operating-mode solvers, including equation construction and legality checks.
-
-- cllc_modes/mode_selector.py Candidate-mode evaluation and final automatic mode selection.
-
-- cllc_modes/plotting.py Waveform stitching and plotting utilities.
-
-- main.py Command-line entry point for solving, mode identification, and waveform export.
-
+- `cllc_modes/stages.py` Stage equations converted from the original Mathematica derivation.
+- `cllc_modes/mode_*.py` Individual operating-mode solvers, including equation construction and legality checks.
+- `cllc_modes/mode_selector.py` Candidate-mode evaluation and reusable operating-point solver.
+- `cllc_modes/sweep.py` `(F, P)` sweep logic and 3D distribution plotting.
+- `cllc_modes/plotting.py` Waveform stitching and plotting utilities.
+- `main.py` Command-line entry point for solving, mode identification, and sweep export.

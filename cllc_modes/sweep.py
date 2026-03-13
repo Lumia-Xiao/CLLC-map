@@ -1,12 +1,11 @@
 from __future__ import annotations
 
-from dataclasses import asdict
 from typing import List, Optional
 
-import numpy as np
 import matplotlib.pyplot as plt
+import numpy as np
 
-from .mode_selector import solve_operating_point
+from .mode_selector import OperatingPointSolver
 
 
 def run_fp_sweep(
@@ -18,10 +17,14 @@ def run_fp_sweep(
     p_max: float,
     p_num: int,
     residual_tol: float = 1e-6,
+    iterative: bool = True,
 ):
     """
     Sweep F and P while keeping k fixed.
     For each (F, P), solve the operating point and record M if successful.
+
+    If iterative=True, solver initial guesses are warm-started from previous
+    converged points to improve robustness and speed on dense sweeps.
     """
 
     f_values = np.linspace(f_min, f_max, f_num)
@@ -32,11 +35,18 @@ def run_fp_sweep(
     total = len(f_values) * len(p_values)
     count = 0
 
-    for F in f_values:
-        for P in p_values:
+    solver = OperatingPointSolver() if iterative else None
+
+    for f_idx, F in enumerate(f_values):
+        p_iter = p_values if (f_idx % 2 == 0) else p_values[::-1]
+
+        for P in p_iter:
             count += 1
             try:
-                result = solve_operating_point(F=F, k=k, P=P)
+                if solver is not None:
+                    result = solver.solve(F=F, k=k, P=P)
+                else:
+                    result = OperatingPointSolver().solve(F=F, k=k, P=P)
 
                 if result.success and result.max_residual is not None and result.max_residual < residual_tol:
                     M = result.params.get("M", np.nan)
@@ -76,6 +86,7 @@ def run_fp_sweep(
             if count % 50 == 0 or count == total:
                 print(f"Progress: {count}/{total}")
 
+    records.sort(key=lambda r: (r["F"], r["P"]))
     return records
 
 
